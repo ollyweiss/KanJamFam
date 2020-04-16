@@ -1,50 +1,42 @@
 const totalCardsAllowed = 10;
 
+
 function setup() {
   let cnv = createCanvas(windowWidth, windowHeight);
   cnv.style('display', 'block');
   
   let paddingDivisor = 200;
   padding = Math.min(windowHeight, windowWidth) / paddingDivisor;
-  minCardSlotPadding = padding * 2;
+  cardSlotPadding = padding * 4;
+
+  cardHeightMax = windowHeight / 8;
 
   boardSetup();
 }
 
 function boardSetup() {
-	let boardRatio = 5
-	let boardHeight = windowHeight * (1 - 1 / boardRatio);
-	let boardX = windowWidth / boardRatio;
-	board = new Board(boardX, 0, windowWidth - boardX, boardHeight);
+	cardSlotSetup();
 
-	deck = new Deck(board);
-	landingBoard = new LandingBoard(board);
-
-	cardSlotSetup(deck);
+	let deckHeight = cardHeight + 2 * cardSlotPadding;
+	deck = new Deck(0, windowHeight - deckHeight, windowWidth, deckHeight);
+	landingBoard = new LandingBoard(0, 0, 2 * cardWidth + 3 * cardSlotPadding, windowHeight - deck.height);
+	board = new Board(landingBoard.width, 0, windowWidth - landingBoard.width, landingBoard.height);
 }
 
-function cardSlotSetup(deck) {
+function cardSlotSetup() {
 	let cardRatio = 1.7;
+	cardWidth = (windowWidth - (totalCardsAllowed + 1) * cardSlotPadding) / totalCardsAllowed;
+	cardHeight = cardWidth * cardRatio;
 
-	cardWidth = (deck.width - (totalCardsAllowed + 1) * minCardSlotPadding) / totalCardsAllowed;
-	cardHeight = deck.height - 2 * minCardSlotPadding;
-
-	let xPadding = 0;
-	let yPadding = 0;
-	if (cardHeight < cardRatio * cardWidth) {
-		cardWidth = cardHeight / cardRatio;
-		yPadding = minCardSlotPadding;
-		xPadding = (deck.width - totalCardsAllowed * cardWidth) / (totalCardsAllowed + 1);
-	} else {
-		cardHeight = cardWidth * cardRatio;
-		xPadding = minCardSlotPadding;
-		yPadding = (deck.height - cardHeight) / 2;
+	if (cardHeight > cardHeightMax) {
+		cardHeight = cardHeightMax;
+		cardWidth = cardHeightMax / cardRatio;
 	}
 
 	cardSlots = [];
-	for (let i = 0; i < totalCardsAllowed; i++) {
-		let x = xPadding + (cardWidth + xPadding) * i;
-		cardSlots.push(new CardSlot(x, deck.y + yPadding, cardWidth, cardHeight));
+	for (let i = totalCardsAllowed; i > 0; i--) {
+		let x = windowWidth - (cardWidth + cardSlotPadding) * i;
+		cardSlots.push(new CardSlot(x, windowHeight - cardSlotPadding - cardHeight, cardWidth, cardHeight));
 	}
 }
 
@@ -133,19 +125,12 @@ class DashedRectangle extends Rectangle {
 }
 
 class Deck extends SolidRectangle {
-	constructor(board) {
-		let y1 = board.getCorners()[3];
-		super(0, y1, windowWidth, windowHeight - y1);
-	}
 }
 
 class Board extends SolidRectangle {
 }
 
 class LandingBoard extends SolidRectangle {
-	constructor(board) {
-		super(0, board.y, windowWidth - board.width, board.height);
-	}
 }
 
 class CardSlot extends DashedRectangle {
