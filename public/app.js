@@ -18,12 +18,14 @@ function boardSetup() {
   cardSlotSetup();
 
   let deckHeight = cardHeight + 2 * cardSlotPadding;
-  deck = new Deck(0, windowHeight - deckHeight, windowWidth, deckHeight);
+  deck = new Deck(padding, windowHeight - deckHeight, windowWidth - 2 * padding, deckHeight - 2 * padding);
   
   let numCards = 1.5;
   let landingBoardWidth = (cardWidth + cardSlotPadding) * numCards + cardSlotPadding;
-  landingBoard = new LandingBoard(0, 0, landingBoardWidth, windowHeight - deck.height);
-  board = new Board(landingBoard.width, 0, windowWidth - landingBoard.width, landingBoard.height);
+  landingBoard = new LandingBoard(padding, padding, landingBoardWidth, deck.y - 2 * padding);
+  
+  let landingBoardX1 = landingBoard.getCorners()[2];
+  board = new Board(landingBoardX1 + padding, padding, windowWidth - landingBoardX1 - 2 * padding, landingBoard.height);
 
   cardSubmissionSlotSetup();
 }
