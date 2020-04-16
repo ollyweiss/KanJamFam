@@ -1,94 +1,104 @@
-let cards = [];
-let cardSelected = false;
-let selectedCard = null;
-let selectDeltaX = 0;
-let selectDeltaY = 0;
+const totalCardsAllowed = 10;
 
 function setup() {
-	console.log("test");
-  createCanvas(windowWidth, windowHeight);
+  let cnv = createCanvas(windowWidth, windowHeight);
+  cnv.style('display', 'block');
+  
+  let paddingDivisor = 200;
+  padding = Math.min(windowHeight, windowWidth) / paddingDivisor;
+  minCardSlotPadding = padding * 2;
 
-  let width = windowWidth / 10;
-  let height = width * 2;
-  let padding = windowWidth / 50;
-  let totalCards = Math.floor((windowWidth - padding) / (width + padding));
-  for (i = 0; i < totalCards; i++) {
-  	let x = padding + i * (width + padding);
-  	let y = (windowHeight / 2) - (height / 2);
-  	cards.push(new Card(x, y, width, height));
-  }
+  boardSetup();
+}
+
+function boardSetup() {
+	let boardRatio = 5
+	let boardHeight = windowHeight * (1 - 1 / boardRatio);
+	let boardX = windowWidth / boardRatio;
+	board = new Board(boardX, 0, windowWidth - boardX, boardHeight);
+
+	deck = new Deck(board);
+	landingBoard = new LandingBoard(board);
+
+	cardSlotSetup(deck);
+}
+
+function cardSlotSetup(deck) {
+	let cardRatio = 1.7;
+
+	cardWidth = (deck.width - (totalCardsAllowed + 1) * minCardSlotPadding) / totalCardsAllowed;
+	cardHeight = deck.height - 2 * minCardSlotPadding;
+
+	let xPadding = 0;
+	let yPadding = 0;
+	if (cardHeight < cardRatio * cardWidth) {
+		cardWidth = cardHeight / cardRatio;
+		yPadding = minCardSlotPadding;
+		xPadding = (deck.width - totalCardsAllowed * cardWidth) / (totalCardsAllowed + 1);
+	} else {
+		cardHeight = cardWidth * cardRatio;
+		xPadding = minCardSlotPadding;
+		yPadding = (deck.height - cardHeight) / 2;
+	}
+
+	cardSlots = [];
+	for (let i = 0; i < totalCardsAllowed; i++) {
+		let x = xPadding + (cardWidth + xPadding) * i;
+		cardSlots.push(new CardSlot(x, deck.y + yPadding, cardWidth, cardHeight));
+	}
+}
+
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+  boardSetup(); // Change this.
 }
 
 function draw() {
-	background("yellow");
+	background(211, 211, 211);
 
-	for (i = cards.length - 1; i >= 0; i--) {
-		cards[i].display("pink");
+	board.display("white");
+	deck.display("white");
+	landingBoard.display("white")
 
-		if (cards[i].overlap()) {
-			cards[i].display("blue");
-		}
-
-		if (cardSelected) {
-			selectedCard.display("purple");
-		}
-	}
+	cardSlots.forEach((cardSlot) => cardSlot.display("pink"));
 }
 
 function mouseDragged() {
-	if (cardSelected) {
-		selectedCard.x = mouseX - selectDeltaX;
-		selectedCard.y = mouseY - selectDeltaY;
-	}
-}
+} 
 
 function mousePressed() {
-	let j = 0;
-	for (i = 0; i < cards.length; i++) {
-		if (cards[j].overlap() && cardSelected == false) {
-			selectCard(j);
-		}
-		else {
-			j++;
-		}
-	}
 }
 
 function mouseReleased() {
-	deselectCard();
 }
 
 function selectCard(i) {
-	selectDeltaX = mouseX - cards[i].x;
-	selectDeltaY = mouseY - cards[i].y;
-	cardSelected = true;
-	selectedCard = cards[i];
-	cards.splice(i, 1);
 }
 
 function deselectCard() {
-	cardSelected = false;
-	cards.unshift(selectedCard);
 }
 
-class Card {
+class Rectangle {
 	constructor(x, y, width, height) {
-		this.width = width;
-		this.height = height;
 		this.x = x;
 		this.y = y;
-		this.selectDeltaX = null;
-		this.selectDeltaY = null;
-		this.selected = false;
+		this.width = width;
+		this.height = height;
 	}
 
 	display(color) {
 		fill(color);
+
+		let cornerRadius = 10;
 		rect(
 			this.x,
 			this.y,
 			this.width, 
-			this.height
+			this.height,
+			cornerRadius,
+			cornerRadius,
+			cornerRadius,
+			cornerRadius
 		);
 	}
 
@@ -98,4 +108,34 @@ class Card {
 			&& mouseY > this.y
 			&& mouseY < (this.y + this.height)
 	}
+
+	getCorners() {
+		let x0 = this.x;
+		let y0 = this.y;
+		let x1 = x0 + this.width;
+		let y1 = y0 + this.height;
+		return [x0, y0, x1, y1];
+	}
+}
+
+class Deck extends Rectangle {
+	constructor(board) {
+		let y1 = board.getCorners()[3];
+		super(0, y1, windowWidth, windowHeight - y1);
+	}
+}
+
+class Board extends Rectangle {
+}
+
+class LandingBoard extends Rectangle {
+	constructor(board) {
+		super(0, board.y, windowWidth - board.width, board.height);
+	}
+}
+
+class CardSlot extends Rectangle {
+}
+
+class Card extends Rectangle {
 }
