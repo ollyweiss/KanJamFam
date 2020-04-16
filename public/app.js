@@ -15,10 +15,10 @@ function setup() {
 }
 
 function boardSetup() {
-  cardSlotSetup();
+  getCardDimensions();
 
   let deckHeight = cardHeight + 2 * cardSlotPadding;
-  deck = new Deck(padding, windowHeight - deckHeight, windowWidth - 2 * padding, deckHeight - 2 * padding);
+  deck = new Deck(padding, windowHeight - deckHeight, windowWidth - 2 * padding, deckHeight - padding);
   
   let numCards = 1.5;
   let landingBoardWidth = (cardWidth + cardSlotPadding) * numCards + cardSlotPadding;
@@ -27,10 +27,11 @@ function boardSetup() {
   let landingBoardX1 = landingBoard.getCorners()[2];
   board = new Board(landingBoardX1 + padding, padding, windowWidth - landingBoardX1 - 2 * padding, landingBoard.height);
 
+  cardSlotSetup();
   cardSubmissionSlotSetup();
 }
 
-function cardSlotSetup() {
+function getCardDimensions() {
   let cardRatio = 1.7;
   cardWidth = (windowWidth - (totalCardsAllowed + 1) * cardSlotPadding) / totalCardsAllowed;
   cardHeight = cardWidth * cardRatio;
@@ -39,11 +40,13 @@ function cardSlotSetup() {
     cardHeight = cardHeightMax;
     cardWidth = cardHeightMax / cardRatio;
   }
+}
 
+function cardSlotSetup() {
   cardSlots = [];
   for (let i = totalCardsAllowed; i > 0; i--) {
     let x = windowWidth - (cardWidth + cardSlotPadding) * i;
-    cardSlots.push(new CardSlot(x, windowHeight - cardSlotPadding - cardHeight, cardWidth, cardHeight));
+    cardSlots.push(new CardSlot(x, calculateCenter(deck.y, deck.height) - cardHeight / 2, cardWidth, cardHeight));
   }
 }
 
@@ -64,7 +67,7 @@ function cardSubmissionSlotSetup() {
 }
 
 function calculateCenter(point, size) {
-  return point + (size - point) / 2;
+  return point + size / 2;
 }
 
 function windowResized() {
