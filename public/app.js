@@ -1,5 +1,5 @@
 const totalCardsAllowed = 10;
-let numBlanks = 2; // Number of cards that need to be submitted.
+let numBlanks = 3; // Number of cards that need to be submitted.
 
 function setup() {
   let cnv = createCanvas(windowWidth, windowHeight);
@@ -20,9 +20,9 @@ function boardSetup() {
   let deckHeight = cardHeight + 2 * cardSlotPadding;
   deck = new Deck(0, windowHeight - deckHeight, windowWidth, deckHeight);
   
-  let numCards = 2;
+  let numCards = 1.5;
   let landingBoardWidth = (cardWidth + cardSlotPadding) * numCards + cardSlotPadding;
-  landingBoard = new LandingBoard(0, 0, 2 * cardWidth + 3 * cardSlotPadding, windowHeight - deck.height);
+  landingBoard = new LandingBoard(0, 0, landingBoardWidth, windowHeight - deck.height);
   board = new Board(landingBoard.width, 0, windowWidth - landingBoard.width, landingBoard.height);
 
   cardSubmissionSlotSetup();
@@ -48,14 +48,15 @@ function cardSlotSetup() {
 function cardSubmissionSlotSetup() {
   let cy = calculateCenter(landingBoard.y, landingBoard.height);
   let cx = calculateCenter(landingBoard.x, landingBoard.width);
+  let padding = cardSlotPadding * 2;
 
-  let totalHeight = (cardHeight + cardSlotPadding) * numBlanks + cardSlotPadding;
+  let totalHeight = (cardHeight + padding) * numBlanks + padding;
   let startingY = cy - (totalHeight / 2);
   let x = cx - cardWidth / 2;
 
   cardSubmissionSlots = [];
   for (let i = 0; i < numBlanks; i++) {
-    let y = startingY + (cardHeight + cardSlotPadding) * i + cardSlotPadding;
+    let y = startingY + (cardHeight + padding) * i + padding;
     cardSubmissionSlots.push(new CardSubmissionSlot(x, y, cardWidth, cardHeight));
   }
 }
