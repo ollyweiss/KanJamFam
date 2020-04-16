@@ -60,7 +60,7 @@ function draw() {
 	deck.display("white");
 	landingBoard.display("white")
 
-	cardSlots.forEach((cardSlot) => cardSlot.display("pink"));
+	cardSlots.forEach((cardSlot) => cardSlot.display("white"));
 }
 
 function mouseDragged() {
@@ -118,23 +118,37 @@ class Rectangle {
 	}
 }
 
-class Deck extends Rectangle {
+class SolidRectangle extends Rectangle {
+	display(color) {
+		drawingContext.setLineDash([]);
+		super.display(color);
+	}
+}
+
+class DashedRectangle extends Rectangle {
+	display(color) {
+		drawingContext.setLineDash([10, 5]);
+		super.display(color);
+	}
+}
+
+class Deck extends SolidRectangle {
 	constructor(board) {
 		let y1 = board.getCorners()[3];
 		super(0, y1, windowWidth, windowHeight - y1);
 	}
 }
 
-class Board extends Rectangle {
+class Board extends SolidRectangle {
 }
 
-class LandingBoard extends Rectangle {
+class LandingBoard extends SolidRectangle {
 	constructor(board) {
 		super(0, board.y, windowWidth - board.width, board.height);
 	}
 }
 
-class CardSlot extends Rectangle {
+class CardSlot extends DashedRectangle {
 }
 
 class Card extends Rectangle {
