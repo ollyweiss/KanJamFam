@@ -12,6 +12,8 @@ function setup() {
   cardHeightMax = windowHeight / 8;
 
   boardSetup();
+
+  card = new Card(windowWidth / 2, windowHeight / 2, cardWidth, cardHeight);
 }
 
 function boardSetup() {
@@ -84,15 +86,25 @@ function draw() {
 
   cardSlots.forEach((cardSlot) => cardSlot.display("white"));
   cardSubmissionSlots.forEach((cardSlot) => cardSlot.display("white"));
+
+  card.display("blue");
 }
 
 function mouseDragged() {
+  if (card.selected) {
+    card.x = mouseX;
+    card.y = mouseY;
+  }  
 } 
 
 function mousePressed() {
+  if (card.mouseOverlap()) {
+    card.select();
+  }
 }
 
 function mouseReleased() {
+  card.deselect();
 }
 
 function selectCard(i) {
@@ -125,11 +137,22 @@ class Rectangle {
     );
   }
 
-  overlap() {
+  mouseOverlap() {
     return mouseX > this.x
       && mouseX < (this.x + this.width)
       && mouseY > this.y
       && mouseY < (this.y + this.height)
+  }
+
+  rectangleOverlap(other) {
+    let thisX0, thisY0, thisX1, thisY1, otherX0, otherY0, otherX1, otherY1;
+    [thisX0, thisY0, thisX1, thisY1] = this.getCorners();
+    [otherX0, otherY0, otherX1, otherY1] = other.getCorners();
+
+    return otherX1 > thisX0 
+      && otherX0 < thisX1 
+      && otherY1 > thisY0
+      && otherY0 < thisY1;
   }
 
   getCorners() {
@@ -165,10 +188,29 @@ class LandingBoard extends SolidRectangle {
 }
 
 class CardSlot extends DashedRectangle {
+  display(color) {
+    if (this.rectangleOverlap(card)) {
+      super.display("gold");
+    } else {
+      super.display(color);
+    }
+  }
 }
 
 class CardSubmissionSlot extends DashedRectangle {
 }
 
-class Card extends Rectangle {
+class Card extends SolidRectangle {
+  constructor(x, y, width, height) {
+    super(x, y, width, height);
+    this.selected = false;
+  }
+
+  select() {
+    this.selected = true;
+  }
+
+  deselect() {
+    this.selected = false;
+  }
 }
